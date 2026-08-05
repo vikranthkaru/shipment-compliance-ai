@@ -1,0 +1,41 @@
+.env
+.env copy
+config/config copy.yaml
+config/salesforce.key
+config/testenv
+testenv
+
+.venv/
+__pycache__/
+*.pyc
+
+docs/*.png
+
+# macOS
+.DS_Store
+
+# Local config files
+config.zip
+*.key
+*.pem
+*.p12
+*.crt
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual env
+.venv/
+
+# Environment files
+.env
+.env.*
+
+.env
+.env.*
+config/salesforce.key
+config/*.key
+__pycache__/
+*.pyc

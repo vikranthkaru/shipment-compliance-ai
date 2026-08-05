@@ -13,11 +13,10 @@ langchain-qwq
 salesforce-cdp-connector
 pyyaml
 simple_salesforce
-grpcio 
-grpcio-tools 
-avro 
 langgraph-checkpoint-mongodb
 rank-bm25
 pymongo
 pydantic-settings
 langchain-openai
+fastapi 
+uvicorn
