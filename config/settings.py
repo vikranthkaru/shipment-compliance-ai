@@ -10,7 +10,10 @@ class Settings(BaseSettings):
     embedding_api_key: str
     embedding_base_url: str = ""
 
-    memory_provider: str = "mongodb"
+    memory_provider: str = "cockroachdb"
+    cockroachdb_uri: str
+    cockroachdb_min_size: int = 10
+    cockroachdb_max_size: int = 100
     mongodb_uri: str
     mongodb_database: str = "shipment_agent_memory"
 

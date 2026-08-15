@@ -14,7 +14,8 @@ from rank_bm25 import BM25Okapi
 
 #Local
 from llm.factory import ( get_structured_chat_model )
-from services.vector_service import (ingest_data_pinecone,delete_shipment_namespace)
+# from services.vector_service import (ingest_data_pinecone,delete_shipment_namespace)
+from services.cockroach_vector_service import (ingest_data_cockroach,delete_shipment_namespace_cockroach)
 from agents.compliance_agent.schemas import (
     RouteComplianceDecision,
     SourceRerankResponse
@@ -769,7 +770,7 @@ def helper_extract_url_content_and_ingest(
 
                 rag_nodes.append(node)
 
-            ingest_data_pinecone(
+            ingest_data_cockroach(
                 rag_nodes=rag_nodes,
                 namespace=namespace,
             )
@@ -874,6 +875,6 @@ def helper_delete_namespace_pinecone(namespace: str | None = None):
     from the Pinecone vector store.
     """
 
-    delete_shipment_namespace(namespace=namespace)
+    delete_shipment_namespace_cockroach(namespace=namespace)
 
 

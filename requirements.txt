@@ -20,3 +20,4 @@ pydantic-settings
 langchain-openai
 fastapi 
 uvicorn
+langchain-cockroachdb

@@ -1,7 +1,8 @@
 import asyncio
 from langchain_core.tools import tool
 from services.salesforce_data_cloud_service import get_data_cloud_connection
-from services.vector_service import fetch_data_from_pinecone
+# from services.vector_service import fetch_data_from_pinecone
+from services.cockroach_vector_service import fetch_data_from_cockroach
 def fetch_company_policy_from_data_cloud(search_text: str, limit: int = 10) -> list[dict]:
     """
     Search Salesforce Data Cloud vector index for internal company policy chunks.
@@ -54,11 +55,11 @@ def search_government_regulations(
 ) -> list:
     """
     Retrieves route-specific government-regulation chunks from the
-    shipment namespace in Pinecone.
+    shipment namespace in cockroach.
     """
     namespace = f"shipment-{shipment_id}"
 
-    nodes = fetch_data_from_pinecone(
+    nodes = fetch_data_from_cockroach(
         query_text=query,
         similarity_top_k=similarity_top_k,
         raw_nodes_only=True,
