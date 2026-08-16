@@ -3,7 +3,7 @@ import os, html, re, hashlib
 from datetime import datetime, timezone
 from typing import  Mapping
 import logging
-
+import json
 logger = logging.getLogger(__name__)
 
 #Third Party
@@ -878,3 +878,51 @@ def helper_delete_namespace_pinecone(namespace: str | None = None):
     delete_shipment_namespace_cockroach(namespace=namespace)
 
 
+def helper_extract_cockroach_rows(
+    mcp_result,
+) -> list[dict]:
+    """
+    Extracts rows from the CockroachDB MCP response.
+
+    Expected MCP response format:
+
+    [
+        {
+            "type": "text",
+            "text": "{\"rows\": [...]}"
+        }
+    ]
+    """
+
+    if not mcp_result:
+        return []
+
+    rows = []
+
+    for item in mcp_result:
+        if not isinstance(item, dict):
+            continue
+
+        text = item.get("text")
+
+        if not text:
+            continue
+
+        try:
+            parsed = json.loads(text)
+
+            result_rows = parsed.get(
+                "rows",
+                [],
+            )
+
+            if isinstance(result_rows, list):
+                rows.extend(result_rows)
+
+        except json.JSONDecodeError:
+            logger.warning(
+                "Unable to parse Cockroach MCP response: %s",
+                text,
+            )
+
+    return rows

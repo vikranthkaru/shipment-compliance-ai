@@ -1,3 +1,4 @@
+import json
 from agents.compliance_agent.state import ComplianceState,RouteComplianceWorkerState
 from langgraph.types import Command,interrupt
 from langgraph.constants import END
@@ -9,13 +10,15 @@ from llm.factory import get_structured_chat_model
 from agents.compliance_agent.schemas import (
     RegulationSearchPlan,
     RouteComplianceDecision,
-    ShipmentComplianceDecision
+    ShipmentComplianceDecision,
+    ShipmentMemoryAnalysis
 )
 
 from agents.compliance_agent.prompts import (
     IDENTIFY_REGULATION_REQUIREMENTS_PROMPT,
     ROUTE_ANALYZER_PROMPT,
-    FINAL_COMPLIANCE_SUMMARY_PROMPT
+    FINAL_COMPLIANCE_SUMMARY_PROMPT,
+    ANALYZE_SHIPMENT_MEMORY_PROMPT
 )
 
 from agents.compliance_agent.helpers import (
@@ -25,11 +28,15 @@ from agents.compliance_agent.helpers import (
     helper_extract_url_content_and_ingest,
     helper_get_route_check_status,
     helper_stringify_list,
-    helper_delete_namespace_pinecone
+    helper_delete_namespace_pinecone,
+    helper_extract_cockroach_rows
 )
 from services.salesforce_service import save_route_check
 from tools.rag_tools import ( fetch_company_policy_from_data_cloud, search_government_regulations )
-
+from services.cockroach_mcp_service import (
+    get_latest_shipment_memory_sync,
+    save_compliance_memory_snapshot_sync,
+)
 
 #node-1
 def validate_shipment_context(state: ComplianceState) -> dict:
@@ -111,7 +118,135 @@ def validate_shipment_context(state: ComplianceState) -> dict:
         "errors": errors
     }
 
-#node-2
+def analyze_shipment_memory(
+    state: ComplianceState,
+) -> dict:
+    """
+    Fetches the latest compact natural-language compliance
+    memory for the shipment and compares it with the current
+    shipment context.
+
+    This node is read-only. It does not create or update
+    compliance memory.
+    """
+
+    shipment_context = state[
+        "shipment_context"
+    ]
+
+    shipment = shipment_context.get(
+        "shipment"
+    ) or {}
+
+    shipment_id = shipment.get(
+        "shipmentId"
+    )
+
+    if not shipment_id:
+        raise ValueError(
+            "shipment_id is required for compliance memory analysis"
+        )
+
+    logger.info(
+        "Fetching latest compliance memory for shipment %s",
+        shipment_id,
+    )
+
+    # --------------------------------------------------
+    # 1. FETCH LATEST MEMORY
+    # --------------------------------------------------
+
+    memory_result = get_latest_shipment_memory_sync(
+        shipment_id=shipment_id,
+    )
+
+    shipment_memory_rows = helper_extract_cockroach_rows(
+        memory_result
+    )
+
+    # The database stores one compact natural-language
+    # memory summary per completed compliance run.
+    previous_memory = None
+
+    if shipment_memory_rows:
+        previous_memory = shipment_memory_rows[0].get(
+            "content"
+        )
+
+    logger.info(
+        "Previous compliance memory found for shipment %s: %s",
+        shipment_id,
+        bool(previous_memory),
+    )
+
+    # --------------------------------------------------
+    # 2. ANALYZE CURRENT SHIPMENT VS PREVIOUS MEMORY
+    # --------------------------------------------------
+
+    llm = get_structured_chat_model(
+        ShipmentMemoryAnalysis
+    )
+
+    response = llm.invoke(
+        ANALYZE_SHIPMENT_MEMORY_PROMPT.format(
+            shipment_context=json.dumps(
+                shipment_context,
+                indent=2,
+                default=str,
+            ),
+            shipment_memory=(
+                previous_memory
+                if previous_memory
+                else (
+                    "No previous compliance memory exists "
+                    "for this shipment."
+                )
+            ),
+        )
+    )
+
+    memory_analysis = response.model_dump(
+        mode="json"
+    )
+
+    logger.info(
+        "Shipment memory analysis completed: %s",
+        memory_analysis,
+    )
+
+    # --------------------------------------------------
+    # 3. CREATE ROUTE ACTION MAP
+    # --------------------------------------------------
+
+    route_memory_actions = {
+        route_decision[
+            "shipment_route_id"
+        ]: {
+            "action": route_decision[
+                "action"
+            ],
+            "reason": route_decision[
+                "reason"
+            ],
+            "previous_status": route_decision.get(
+                "previous_status"
+            ),
+            "route_changed": route_decision.get(
+                "route_changed",
+                True,
+            ),
+        }
+        for route_decision in memory_analysis.get(
+            "route_decisions",
+            [],
+        )
+    }
+
+    return {
+        "shipment_memory": previous_memory,
+        "route_memory_actions": route_memory_actions,
+    }
+
 def identify_regulation_requirements(state:ComplianceState) -> ComplianceState:
     llm = get_structured_chat_model(RegulationSearchPlan)
 
@@ -198,43 +333,140 @@ def index_regulation_content(state:ComplianceState)-> dict:
 
     return {}
 
-def final_compliance_summary_node(state):
-    shipment_context = state["shipment_context"]
-    route_results = state.get("route_compliance_results", {})
 
-    llm = get_structured_chat_model(ShipmentComplianceDecision)
-    shipment_context = state["shipment_context"]
-    shipment_id = state["shipment_context"]["shipment"]["shipmentId"]
-    product_id = state["shipment_context"]["product"]["productId"]
+def final_compliance_summary_node(
+    state: ComplianceState,
+) -> dict:
+
+    shipment_context = state[
+        "shipment_context"
+    ]
+
+    route_results = state.get(
+        "route_compliance_results",
+        {},
+    )
+
+    shipment = shipment_context.get(
+        "shipment",
+        {},
+    )
+
+    product = shipment_context.get(
+        "product",
+        {},
+    )
+
+    shipment_id = shipment.get(
+        "shipmentId"
+    )
+
+    product_id = product.get(
+        "productId"
+    )
+
+    if not shipment_id:
+        raise ValueError(
+            "shipment_id is required for final compliance summary"
+        )
+
     namespace = f"shipment-{shipment_id}"
+
+    # --------------------------------------------------
+    # 1. FINAL LLM COMPLIANCE DECISION
+    # --------------------------------------------------
+
+    llm = get_structured_chat_model(
+        ShipmentComplianceDecision
+    )
+
     response = llm.invoke(
         FINAL_COMPLIANCE_SUMMARY_PROMPT.format(
             shipment_context=shipment_context,
             route_compliance_results=route_results,
         )
     )
-    decision = response.model_dump()
+
+    decision = response.model_dump(
+        mode="json"
+    )
+
+    # --------------------------------------------------
+    # 2. UPDATE SALESFORCE SHIPMENT COMPLIANCE
+    # --------------------------------------------------
+
     save_route_check(
         {
             "identifier": "SHIPMENT_COMPLIANCE",
             "shipmentCompliance": {
                 "shipmentDetailId": shipment_id,
                 "productId": product_id,
-                "overallStatus": decision["overall_status"],
-                "overallRiskLevel": decision["overall_risk_level"],
-                "aiReasoning": decision["ai_reasoning"],
-                "anomaliesFound": "\n".join(decision["blocking_issues"]),
-                "evidenceSummary": "\n".join(decision["evidence_summary"]),
-                "missingDocuments": "\n".join(decision["missing_documents"]),
-                "recommendedAction": decision["recommended_next_action"],
-                "humanReviewRequired": decision["human_review_required"],
-                "confidenceScore": decision["confidence_score"],
+                "overallStatus": decision[
+                    "overall_status"
+                ],
+                "overallRiskLevel": decision[
+                    "overall_risk_level"
+                ],
+                "aiReasoning": decision[
+                    "ai_reasoning"
+                ],
+                "anomaliesFound": "\n".join(
+                    decision.get(
+                        "blocking_issues",
+                        [],
+                    )
+                ),
+                "evidenceSummary": "\n".join(
+                    decision.get(
+                        "evidence_summary",
+                        [],
+                    )
+                ),
+                "missingDocuments": "\n".join(
+                    decision.get(
+                        "missing_documents",
+                        [],
+                    )
+                ),
+                "recommendedAction": decision[
+                    "recommended_next_action"
+                ],
+                "humanReviewRequired": decision[
+                    "human_review_required"
+                ],
+                "confidenceScore": decision[
+                    "confidence_score"
+                ],
             },
         }
     )
-    helper_delete_namespace_pinecone(namespace=namespace)
+
+    # --------------------------------------------------
+    # 3. SAVE COMPACT NLP MEMORY
+    # --------------------------------------------------
+
+    save_compliance_memory_snapshot_sync(
+        shipment_id=shipment_id,
+
+        content=decision[
+            "memory_summary"
+        ],
+
+        thread_id=state.get(
+            "thread_id"
+        ),
+    )
+
+    # --------------------------------------------------
+    # 4. CLEAN TEMPORARY RETRIEVAL DATA
+    # --------------------------------------------------
+
+    helper_delete_namespace_pinecone(
+        namespace=namespace
+    )
+
     return {
-        "compliance_result": response.model_dump()
+        "compliance_result": decision
     }
 
 #---------------------------Sub Graphs----------#
@@ -361,11 +593,16 @@ def analyzer_node(state:RouteComplianceWorkerState) -> Command[Literal["human_in
 
     req = state["regulation_requirement"]
     shipment_context = state["shipment_context"]
+    shipment = shipment_context.get(
+        "shipment"
+    ) or {}
 
+    shipment_id = shipment.get(
+        "shipmentId"
+    )
     country = req["country"]
     route_type = req["route_type"]
     route_id = state["route_id"]
-
    # Insert_New_Iteration --> call salesforce class with iteration count this will be like 1st iteration only insert, 2nd interatoon (1st iteratioon failed, 2nd iteration new), 3rd iteration (2nd iteration failed, 3rd iteration new)
     if iteration_count > 3:
         # Do not create iteration 4. and update iteration 3 to blocked
@@ -374,7 +611,6 @@ def analyzer_node(state:RouteComplianceWorkerState) -> Command[Literal["human_in
             "country": country,
             "routeType": route_type,
             "iterationNumber" : 3,
-            "operation" : "Update_Current_Iteration",
             "complianceStatus": "Blocked",
             "riskLevel": "HIGH",
             "confidenceScore": 0.3,
@@ -395,6 +631,7 @@ def analyzer_node(state:RouteComplianceWorkerState) -> Command[Literal["human_in
                 "Unable to block the final route-check iteration: "
                 f"{max_update_response.get('message')}"
             )
+
 
         #update 3rd iteration to compliance status maximum iteration failure
         return Command(
@@ -429,7 +666,6 @@ def analyzer_node(state:RouteComplianceWorkerState) -> Command[Literal["human_in
         {
             "identifier": "ROUTE_COMPLIANCE",
             "routeCheck": {
-                "operation": "Insert_New_Iteration",
                 "shipmentRouteId": route_id,
                 "country": country,
                 "routeType": route_type,
@@ -479,12 +715,12 @@ def analyzer_node(state:RouteComplianceWorkerState) -> Command[Literal["human_in
         "route_decision": decision,
     }
 
+
     if decision.get("human_intervention_required"):
         return Command(
             update=worker_update,
             goto="human_intervention_node",
         )
-   
 
     #If analysis shows no human review required: complete the current iteration.
     final_status = helper_get_route_check_status(decision)
@@ -492,7 +728,6 @@ def analyzer_node(state:RouteComplianceWorkerState) -> Command[Literal["human_in
         {
             "identifier": "ROUTE_COMPLIANCE",
             "routeCheck": {
-                "operation": "Update_Current_Iteration",
                 "shipmentRouteId": route_id,
                 "country": country,
                 "routeType": route_type,
@@ -617,4 +852,3 @@ def subgraph_reducer_node(state: RouteComplianceWorkerState):
             route_key: final_data
         }
     }
-

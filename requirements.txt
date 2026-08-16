@@ -21,3 +21,4 @@ langchain-openai
 fastapi 
 uvicorn
 langchain-cockroachdb
+langchain_mcp_adapters

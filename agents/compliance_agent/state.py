@@ -16,6 +16,21 @@ class ComplianceState(TypedDict):
     event: Dict[str, Any]
     shipment_context: Dict[str, Any]
 
+    # Output of compliance memory analysis
+    shipment_memory: List[Dict[str, Any]] | None
+    # Route-level decision produced by memory analysis.
+    #
+    # Example:
+    # {
+    #     "a02g500000APQ6PAAX": {
+    #         "action": "SKIP",
+    #         "reason": "...",
+    #         "previous_status": "COMPLIANT",
+    #         "route_changed": False,
+    #     }
+    # }
+    route_memory_actions: Dict[str, Dict[str, Any]]
+
      # Output of Node 2
     regulation_search_plan: Dict | None
 

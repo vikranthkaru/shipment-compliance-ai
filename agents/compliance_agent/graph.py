@@ -1,6 +1,7 @@
 from langgraph.graph import StateGraph, START, END
 from agents.compliance_agent.state import ComplianceState,RouteComplianceWorkerState
 from agents.compliance_agent.nodes import (
+        analyze_shipment_memory,
         validate_shipment_context,
         identify_regulation_requirements,
         index_regulation_content,
@@ -44,6 +45,7 @@ def build_compliance_subgraph():
 def build_compliance_graph():
         graph = StateGraph(ComplianceState)
         graph.add_node("validate_shipment_context", validate_shipment_context)
+        graph.add_node("analyze_shipment_memory",analyze_shipment_memory)
         graph.add_node("identify_regulation_requirements", identify_regulation_requirements)
         graph.add_node("index_regulation_content", index_regulation_content)
         graph.add_node("final_compliance_summary_node", final_compliance_summary_node)
@@ -55,9 +57,14 @@ def build_compliance_graph():
             "validate_shipment_context",
             route_validation_edge,
             {
-                "continue": "identify_regulation_requirements",
+                "continue": "analyze_shipment_memory",
                 "end": END,
             },
+        )
+
+        graph.add_edge(
+            "analyze_shipment_memory",
+            "identify_regulation_requirements",
         )
         graph.add_edge(
             "identify_regulation_requirements", "index_regulation_content"

@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List
+from typing import List,Literal
 from pydantic import BaseModel, Field
 
 
@@ -57,7 +57,10 @@ class ShipmentComplianceDecision(BaseModel):
     shipment_number: str
 
     overall_status: str = Field(
-        description="COMPLIANT, REVIEW_REQUIRED, NON_COMPLIANT, or BLOCKED"
+        description=(
+            "COMPLIANT, REVIEW_REQUIRED, "
+            "NON_COMPLIANT, or BLOCKED"
+        )
     )
 
     overall_risk_level: str = Field(
@@ -82,6 +85,23 @@ class ShipmentComplianceDecision(BaseModel):
 
     recommended_next_action: str
 
+    # --------------------------------------------------
+    # COMPLIANCE MEMORY
+    # --------------------------------------------------
+
+    memory_summary: str = Field(
+        description=(
+            "Compact natural-language memory for future "
+            "shipment compliance executions. Include the "
+            "shipment's overall outcome and, for every route, "
+            "the shipment_route_id, country, route_type, "
+            "previous compliance outcome, and the important "
+            "conditions or reasons needed to determine whether "
+            "that route can be SKIPPED or must be ANALYZED "
+            "during the next execution."
+        )
+    )
+
 
 class SourceRerankResult(BaseModel):
     source_index: int
@@ -101,3 +121,51 @@ class SourceRerankResult(BaseModel):
 
 class SourceRerankResponse(BaseModel):
     results: list[SourceRerankResult]
+
+
+
+class RouteMemoryDecision(BaseModel):
+    shipment_route_id: str = Field(
+        description="The Salesforce shipment route ID."
+    )
+
+    action: Literal["SKIP", "ANALYZE"] = Field(
+        description=(
+            "SKIP only when the current route is unchanged "
+            "and the latest relevant previous result was PASSED. "
+            "Otherwise ANALYZE."
+        )
+    )
+
+    reason: str = Field(
+        description=(
+            "Explanation based on current shipment context "
+            "and previous compliance memory."
+        )
+    )
+
+    previous_status: str | None = Field(
+        default=None,
+        description=(
+            "Latest relevant previous compliance status "
+            "for this route, if available."
+        )
+    )
+
+    route_changed: bool = Field(
+        description=(
+            "Whether the current route differs from the "
+            "previous route snapshot."
+        )
+    )
+
+
+class ShipmentMemoryAnalysis(BaseModel):
+    route_decisions: list[RouteMemoryDecision]
+
+    overall_reasoning: str = Field(
+        description=(
+            "Summary of how previous shipment compliance "
+            "memory was used."
+        )
+    )

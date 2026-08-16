@@ -211,7 +211,6 @@ def process_interrupts(
             {
                 "identifier": "ROUTE_COMPLIANCE",
                 "routeCheck": {
-                    "operation": "Update_Current_Iteration",
                     "shipmentRouteId": interrupt_payload[
                         "shipment_route_id"
                     ],
