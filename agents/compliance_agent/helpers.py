@@ -14,7 +14,6 @@ from rank_bm25 import BM25Okapi
 
 #Local
 from llm.factory import ( get_structured_chat_model )
-# from services.vector_service import (ingest_data_pinecone,delete_shipment_namespace)
 from services.cockroach_vector_service import (ingest_data_cockroach,delete_shipment_namespace_cockroach)
 from agents.compliance_agent.schemas import (
     RouteComplianceDecision,

@@ -1,41 +1,64 @@
+# --------------------------------------------------
+# Environment and secrets
+# --------------------------------------------------
+
 .env
-.env copy
-config/config copy.yaml
+.env.*
+!.env.example
+
 config/salesforce.key
+config/*.key
+config/*.pem
+config/*.p12
+config/*.crt
+
+config/config copy.yaml
 config/testenv
 testenv
 
-.venv/
+
+# --------------------------------------------------
+# Python
+# --------------------------------------------------
+
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+
+
+# --------------------------------------------------
+# Virtual environments
+# --------------------------------------------------
+
+.venv/
+venv/
+env/
+
+
+# --------------------------------------------------
+# Tests
+# --------------------------------------------------
+
+test/
+
+
+# --------------------------------------------------
+# Documentation artifacts
+# --------------------------------------------------
 
 docs/*.png
 
+
+# --------------------------------------------------
 # macOS
+# --------------------------------------------------
+
 .DS_Store
 
-# Local config files
+
+# --------------------------------------------------
+# Local / temporary files
+# --------------------------------------------------
+
 config.zip
-*.key
-*.pem
-*.p12
-*.crt
-
-# Python
-__pycache__/
-*.pyc
-*.pyo
-
-# Virtual env
-.venv/
-
-# Environment files
-.env
-.env.*
-
-.env
-.env.*
-config/salesforce.key
-config/*.key
-__pycache__/
-*.pyc
+*.log

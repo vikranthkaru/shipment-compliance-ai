@@ -1,7 +1,6 @@
 import asyncio
 from langchain_core.tools import tool
 from services.salesforce_data_cloud_service import get_data_cloud_connection
-# from services.vector_service import fetch_data_from_pinecone
 from services.cockroach_vector_service import fetch_data_from_cockroach
 def fetch_company_policy_from_data_cloud(search_text: str, limit: int = 10) -> list[dict]:
     """
