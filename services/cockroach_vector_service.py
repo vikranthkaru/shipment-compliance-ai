@@ -78,7 +78,6 @@ def ensure_cockroach_index() -> None:
             # Create vector index if it does not exist.
             #
             # namespace is the first column because your current
-            # Pinecone implementation isolates data using:
             #
             # namespace = f"shipment-{{shipment_id}}"
             #
@@ -104,7 +103,6 @@ def ingest_data_cockroach(
     Generate embeddings using the existing embedding model
     and store the regulatory chunks in CockroachDB.
 
-    Mirrors the existing Pinecone ingestion behavior.
     """
 
     if not rag_nodes:
@@ -320,7 +318,6 @@ def delete_shipment_namespace_cockroach(
     Delete all regulatory chunks belonging to
     a shipment namespace.
 
-    Equivalent to the current Pinecone:
 
         delete(
             delete_all=True,

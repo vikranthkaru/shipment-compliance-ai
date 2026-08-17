@@ -19,14 +19,14 @@ graph TD;
 	final_compliance_summary_node --> __end__;
 	subgraph compliance_parallel_subgraph
 	compliance_parallel_subgraph\3asalesforce_node(salesforce_node)
-	compliance_parallel_subgraph\3apinecone_node(pinecone_node)
+	compliance_parallel_subgraph\3aexternal_policy_nodeexternal_policy_node)
 	compliance_parallel_subgraph\3aanalyzer_node(analyzer_node)
 	compliance_parallel_subgraph\3ahuman_intervention_node(human_intervention_node)
 	compliance_parallel_subgraph\3a__end__(<p>__end__</p>)
 	compliance_parallel_subgraph\3aanalyzer_node -.-> compliance_parallel_subgraph\3ahuman_intervention_node;
 	compliance_parallel_subgraph\3ahuman_intervention_node -.-> compliance_parallel_subgraph\3aanalyzer_node;
-	compliance_parallel_subgraph\3apinecone_node --> compliance_parallel_subgraph\3aanalyzer_node;
-	compliance_parallel_subgraph\3asalesforce_node --> compliance_parallel_subgraph\3apinecone_node;
+	compliance_parallel_subgraph\3aexternal_policy_node --> compliance_parallel_subgraph\3aanalyzer_node;
+	compliance_parallel_subgraph\3asalesforce_node --> compliance_parallel_subgraph\3aexternal_policy_node;
 	compliance_parallel_subgraph\3aanalyzer_node -.-> compliance_parallel_subgraph\3a__end__;
 	end
 	classDef default fill:#f2f0ff,line-height:1.2

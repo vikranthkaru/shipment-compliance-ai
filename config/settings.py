@@ -14,8 +14,6 @@ class Settings(BaseSettings):
     cockroachdb_uri: str
     cockroachdb_min_size: int = 10
     cockroachdb_max_size: int = 100
-    mongodb_uri: str
-    mongodb_database: str = "shipment_agent_memory"
 
 
     model_config = SettingsConfigDict(

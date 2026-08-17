@@ -868,10 +868,9 @@ def helper_get_route_check_status(
     return "Failed"
 
 
-def helper_delete_namespace_pinecone(namespace: str | None = None):
+def helper_delete_shipment_namespace(namespace: str | None = None):
     """
     Deletes all regulatory content for a specific shipment namespace
-    from the Pinecone vector store.
     """
 
     delete_shipment_namespace_cockroach(namespace=namespace)

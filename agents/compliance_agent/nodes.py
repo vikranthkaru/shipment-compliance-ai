@@ -28,7 +28,7 @@ from agents.compliance_agent.helpers import (
     helper_extract_url_content_and_ingest,
     helper_get_route_check_status,
     helper_stringify_list,
-    helper_delete_namespace_pinecone,
+    helper_delete_shipment_namespace,
     helper_extract_cockroach_rows
 )
 from services.salesforce_service import save_route_check
@@ -267,7 +267,7 @@ def index_regulation_content(state:ComplianceState)-> dict:
     """
     Node 3:
     Reads regulation_search_plan from state, searches/crawls official regulation content,
-    chunks/enriches it, and stores it in Pinecone.
+    chunks/enriches it, and stores it in CockroachDB vector storage.
 
     This node performs a side-effect only.
     It does not update LangGraph state.
@@ -461,7 +461,7 @@ def final_compliance_summary_node(
     # 4. CLEAN TEMPORARY RETRIEVAL DATA
     # --------------------------------------------------
 
-    helper_delete_namespace_pinecone(
+    helper_delete_shipment_namespace(
         namespace=namespace
     )
 
