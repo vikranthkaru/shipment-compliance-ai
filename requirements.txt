@@ -10,11 +10,14 @@ aiohttp==3.14.3
     #   langchain-community
     #   langchain-tavily
     #   litellm
+    #   llama-index-core
     #   tavily
 aiosignal==1.4.0
     # via aiohttp
 aiosqlite==0.22.1
-    # via langgraph-checkpoint-sqlite
+    # via
+    #   langgraph-checkpoint-sqlite
+    #   llama-index-core
 annotated-doc==0.0.5
     # via
     #   fastapi
@@ -43,6 +46,8 @@ attrs==26.1.0
     #   zeep
 auth0-python==6.1.0
     # via crewai
+banks==2.5.0
+    # via llama-index-core
 bcrypt==5.0.0
     # via chromadb
 blinker==1.9.0
@@ -69,11 +74,13 @@ click==8.4.2
     #   crewai
     #   huggingface-hub
     #   litellm
+    #   nltk
     #   uvicorn
-colorama==0.4.6 ; os_name == 'nt' or sys_platform == 'win32'
+colorama==0.4.6
     # via
     #   build
     #   click
+    #   griffecli
     #   ipython
     #   tqdm
     #   typer
@@ -86,8 +93,19 @@ cryptography==49.0.0
     #   auth0-python
     #   pdfminer-six
     #   pyjwt
+dataclasses-json==0.6.7
+    # via llama-index-core
 decorator==5.3.1
     # via ipython
+defusedxml==0.7.1
+    # via nltk
+deprecated==1.3.1
+    # via
+    #   banks
+    #   llama-index-core
+    #   llama-index-instrumentation
+dirtyjson==1.0.8
+    # via llama-index-core
 distro==1.9.0
     # via
     #   groq
@@ -107,6 +125,10 @@ fastapi==0.141.1
     # via hackthon-project
 filelock==3.32.2
     # via huggingface-hub
+filetype==1.2.0
+    # via
+    #   banks
+    #   llama-index-core
 flatbuffers==25.12.19
     # via onnxruntime
 frozenlist==1.8.0
@@ -114,7 +136,9 @@ frozenlist==1.8.0
     #   aiohttp
     #   aiosignal
 fsspec==2026.7.0
-    # via huggingface-hub
+    # via
+    #   huggingface-hub
+    #   llama-index-core
 googleapis-common-protos==1.75.0
     # via
     #   opentelemetry-exporter-otlp-proto-grpc
@@ -123,6 +147,14 @@ greenlet==3.5.4
     # via
     #   langchain-cockroachdb
     #   sqlalchemy
+griffe==2.2.0
+    # via banks
+griffecli==2.2.0
+    # via griffe
+griffelib==2.2.0
+    # via
+    #   griffe
+    #   griffecli
 groq==0.37.1
     # via
     #   hackthon-project
@@ -150,6 +182,7 @@ httpx==0.28.1
     #   langgraph-sdk
     #   langsmith
     #   litellm
+    #   llama-index-core
     #   mcp
     #   openai
 httpx-sse==0.4.3
@@ -186,6 +219,7 @@ jedi==0.20.0
     # via ipython
 jinja2==3.1.6
     # via
+    #   banks
     #   instructor
     #   litellm
     #   pyvis
@@ -193,6 +227,8 @@ jiter==0.14.0
     # via
     #   instructor
     #   openai
+joblib==1.5.3
+    # via nltk
 json-repair==0.53.1
     # via
     #   crewai
@@ -300,12 +336,24 @@ langsmith==0.10.13
     #   langchain-qwq
 litellm==1.72.0
     # via crewai
+llama-index-core==0.14.23
+    # via
+    #   hackthon-project
+    #   llama-index-embeddings-openai
+llama-index-embeddings-openai==0.6.0
+    # via hackthon-project
+llama-index-instrumentation==0.5.0
+    # via llama-index-workflows
+llama-index-workflows==2.23.2
+    # via llama-index-core
 lxml==6.1.1
     # via zeep
 markdown-it-py==4.2.0
     # via rich
 markupsafe==3.0.3
     # via jinja2
+marshmallow==3.26.2
+    # via dataclasses-json
 matplotlib-inline==0.2.2
     # via ipython
 mcp==1.29.0
@@ -324,13 +372,22 @@ multidict==6.7.1
     # via
     #   aiohttp
     #   yarl
+mypy-extensions==1.1.0
+    # via typing-inspect
+nest-asyncio==1.6.0
+    # via llama-index-core
 networkx==3.6.1
-    # via pyvis
+    # via
+    #   llama-index-core
+    #   pyvis
+nltk==3.10.3
+    # via llama-index-core
 numpy==2.5.1
     # via
     #   chromadb
     #   langchain-cockroachdb
     #   langchain-community
+    #   llama-index-core
     #   onnxruntime
     #   pandas
     #   rank-bm25
@@ -346,6 +403,7 @@ openai==2.50.0
     #   instructor
     #   langchain-openai
     #   litellm
+    #   llama-index-embeddings-openai
 openpyxl==3.1.5
     # via crewai
 opentelemetry-api==1.44.0
@@ -394,6 +452,7 @@ packaging==24.2
     #   huggingface-hub
     #   langchain-core
     #   langsmith
+    #   marshmallow
     #   onnxruntime
 pandas==3.0.5
     # via
@@ -408,9 +467,14 @@ pdfplumber==0.11.10
 pexpect==4.9.0 ; sys_platform != 'emscripten' and sys_platform != 'win32'
     # via ipython
 pillow==12.3.0
-    # via pdfplumber
+    # via
+    #   llama-index-core
+    #   pdfplumber
 platformdirs==4.11.0
-    # via zeep
+    # via
+    #   banks
+    #   llama-index-core
+    #   zeep
 prompt-toolkit==3.0.53
     # via ipython
 propcache==0.5.2
@@ -452,6 +516,7 @@ pycparser==3.0 ; implementation_name != 'PyPy' and platform_python_implementatio
 pydantic==2.13.4
     # via
     #   auth0-python
+    #   banks
     #   chromadb
     #   crewai
     #   fastapi
@@ -463,6 +528,9 @@ pydantic==2.13.4
     #   langgraph
     #   langsmith
     #   litellm
+    #   llama-index-core
+    #   llama-index-instrumentation
+    #   llama-index-workflows
     #   mcp
     #   openai
     #   pydantic-settings
@@ -526,6 +594,7 @@ pyyaml==6.0.3
     #   langchain-classic
     #   langchain-community
     #   langchain-core
+    #   llama-index-core
     #   uvicorn
 rank-bm25==0.2.2
     # via hackthon-project
@@ -536,6 +605,7 @@ referencing==0.37.0
 regex==2026.7.19
     # via
     #   crewai
+    #   nltk
     #   tiktoken
 requests==2.34.2
     # via
@@ -548,6 +618,7 @@ requests==2.34.2
     #   langchain-qwq
     #   langchain-tavily
     #   langsmith
+    #   llama-index-core
     #   opentelemetry-exporter-otlp-proto-http
     #   requests-file
     #   requests-oauthlib
@@ -576,6 +647,8 @@ rpds-py==2026.6.3
     #   referencing
 salesforce-cdp-connector==1.0.20
     # via hackthon-project
+setuptools==84.0.0
+    # via llama-index-core
 shellingham==1.5.4
     # via typer
 simple-salesforce==1.12.10
@@ -594,6 +667,7 @@ sqlalchemy==2.0.51
     #   langchain-classic
     #   langchain-cockroachdb
     #   langchain-community
+    #   llama-index-core
     #   sqlalchemy-cockroachdb
 sqlalchemy-cockroachdb==2.0.4
     # via langchain-cockroachdb
@@ -618,10 +692,14 @@ tenacity==9.1.4
     #   instructor
     #   langchain-community
     #   langchain-core
+    #   llama-index-core
 tiktoken==0.13.0
     # via
     #   langchain-openai
     #   litellm
+    #   llama-index-core
+tinytag==2.3.0
+    # via llama-index-core
 tokenizers==0.22.2
     # via
     #   chromadb
@@ -636,6 +714,8 @@ tqdm==4.70.0
     # via
     #   chromadb
     #   huggingface-hub
+    #   llama-index-core
+    #   nltk
     #   openai
 traitlets==5.15.1
     # via
@@ -660,6 +740,8 @@ typing-extensions==4.16.0
     #   langchain-mcp-adapters
     #   langchain-protocol
     #   langsmith
+    #   llama-index-core
+    #   llama-index-workflows
     #   mcp
     #   openai
     #   opentelemetry-api
@@ -675,7 +757,12 @@ typing-extensions==4.16.0
     #   simple-salesforce
     #   sqlalchemy
     #   starlette
+    #   typing-inspect
     #   typing-inspection
+typing-inspect==0.9.0
+    # via
+    #   dataclasses-json
+    #   llama-index-core
 typing-inspection==0.4.2
     # via
     #   fastapi
@@ -717,6 +804,10 @@ websockets==15.0.1
     #   langgraph-sdk
     #   langsmith
     #   uvicorn
+wrapt==2.3.0
+    # via
+    #   deprecated
+    #   llama-index-core
 xxhash==3.8.1
     # via
     #   langgraph
