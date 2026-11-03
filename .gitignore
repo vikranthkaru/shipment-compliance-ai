@@ -39,4 +39,4 @@ config/salesforce.key
 config/*.key
 __pycache__/
 *.pyc
-run.py
+run.pyaws-secret.json

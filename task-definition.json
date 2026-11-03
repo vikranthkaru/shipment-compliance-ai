@@ -1,38 +1,194 @@
 {
-  "family": "compliance-ai-service",
-  "networkMode": "awsvpc",
-  "requiresCompatibilities": [
-    "FARGATE"
-  ],
-  "cpu": "1024",
-  "memory": "2048",
-  "executionRoleArn": "arn:aws:iam::263704545632:role/ecsTaskExecutionRole",
-  "containerDefinitions": [
-    {
-      "name": "compliance-ai-service",
-      "image": "263704545632.dkr.ecr.ap-south-1.amazonaws.com/compliance-ai-service:latest",
-      "essential": true,
-      "portMappings": [
+    "taskDefinitionArn": "arn:aws:ecs:ap-south-1:263704545632:task-definition/compliance-ai-service:1",
+    "containerDefinitions": [
         {
-          "containerPort": 8000,
-          "hostPort": 8000,
-          "protocol": "tcp"
+            "name": "compliance-ai-service",
+            "image": "263704545632.dkr.ecr.ap-south-1.amazonaws.com/compliance-ai-service:latest",
+            "cpu": 0,
+            "portMappings": [
+                {
+                    "containerPort": 8000,
+                    "hostPort": 8000,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "environment": [
+                {
+                    "name": "PORT",
+                    "value": "8000"
+                }
+            ],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "secrets": [
+                {
+                    "name": "CHAT_PROVIDER",
+                    "valueFrom": "arn:aws:secretsmanager:ap-south-1:263704545632:secret:compliance-ai-service/config-6xLcuJ:CHAT_PROVIDER::"
+                },
+                {
+                    "name": "CHAT_MODEL",
+                    "valueFrom": "arn:aws:secretsmanager:ap-south-1:263704545632:secret:compliance-ai-service/config-6xLcuJ:CHAT_MODEL::"
+                },
+                {
+                    "name": "CHAT_API_KEY",
+                    "valueFrom": "arn:aws:secretsmanager:ap-south-1:263704545632:secret:compliance-ai-service/config-6xLcuJ:CHAT_API_KEY::"
+                },
+                {
+                    "name": "CHAT_BASE_URL",
+                    "valueFrom": "arn:aws:secretsmanager:ap-south-1:263704545632:secret:compliance-ai-service/config-6xLcuJ:CHAT_BASE_URL::"
+                },
+                {
+                    "name": "EMBEDDING_PROVIDER",
+                    "valueFrom": "arn:aws:secretsmanager:ap-south-1:263704545632:secret:compliance-ai-service/config-6xLcuJ:EMBEDDING_PROVIDER::"
+                },
+                {
+                    "name": "EMBEDDING_MODEL",
+                    "valueFrom": "arn:aws:secretsmanager:ap-south-1:263704545632:secret:compliance-ai-service/config-6xLcuJ:EMBEDDING_MODEL::"
+                },
+                {
+                    "name": "EMBEDDING_BASE_URL",
+                    "valueFrom": "arn:aws:secretsmanager:ap-south-1:263704545632:secret:compliance-ai-service/config-6xLcuJ:EMBEDDING_BASE_URL::"
+                },
+                {
+                    "name": "EMBEDDING_API_KEY",
+                    "valueFrom": "arn:aws:secretsmanager:ap-south-1:263704545632:secret:compliance-ai-service/config-6xLcuJ:EMBEDDING_API_KEY::"
+                },
+                {
+                    "name": "TAVILY_URL",
+                    "valueFrom": "arn:aws:secretsmanager:ap-south-1:263704545632:secret:compliance-ai-service/config-6xLcuJ:TAVILY_URL::"
+                },
+                {
+                    "name": "TAVILY_API_KEY",
+                    "valueFrom": "arn:aws:secretsmanager:ap-south-1:263704545632:secret:compliance-ai-service/config-6xLcuJ:TAVILY_API_KEY::"
+                },
+                {
+                    "name": "MEMORY_PROVIDER",
+                    "valueFrom": "arn:aws:secretsmanager:ap-south-1:263704545632:secret:compliance-ai-service/config-6xLcuJ:MEMORY_PROVIDER::"
+                },
+                {
+                    "name": "COCKROACHDB_URI",
+                    "valueFrom": "arn:aws:secretsmanager:ap-south-1:263704545632:secret:compliance-ai-service/config-6xLcuJ:COCKROACHDB_URI::"
+                },
+                {
+                    "name": "VECTOR_INDEX_NAME",
+                    "valueFrom": "arn:aws:secretsmanager:ap-south-1:263704545632:secret:compliance-ai-service/config-6xLcuJ:VECTOR_INDEX_NAME::"
+                },
+                {
+                    "name": "VECTOR_DIMENSION",
+                    "valueFrom": "arn:aws:secretsmanager:ap-south-1:263704545632:secret:compliance-ai-service/config-6xLcuJ:VECTOR_DIMENSION::"
+                },
+                {
+                    "name": "TABLE_NAME",
+                    "valueFrom": "arn:aws:secretsmanager:ap-south-1:263704545632:secret:compliance-ai-service/config-6xLcuJ:TABLE_NAME::"
+                },
+                {
+                    "name": "COCKROACH_MCP_URL",
+                    "valueFrom": "arn:aws:secretsmanager:ap-south-1:263704545632:secret:compliance-ai-service/config-6xLcuJ:COCKROACH_MCP_URL::"
+                },
+                {
+                    "name": "COCKROACH_MCP_API_KEY",
+                    "valueFrom": "arn:aws:secretsmanager:ap-south-1:263704545632:secret:compliance-ai-service/config-6xLcuJ:COCKROACH_MCP_API_KEY::"
+                },
+                {
+                    "name": "COCKROACH_MCP_CLUSTER_ID",
+                    "valueFrom": "arn:aws:secretsmanager:ap-south-1:263704545632:secret:compliance-ai-service/config-6xLcuJ:COCKROACH_MCP_CLUSTER_ID::"
+                },
+                {
+                    "name": "LANGSMITH_API_KEY",
+                    "valueFrom": "arn:aws:secretsmanager:ap-south-1:263704545632:secret:compliance-ai-service/config-6xLcuJ:LANGSMITH_API_KEY::"
+                },
+                {
+                    "name": "LANGSMITH_TRACING",
+                    "valueFrom": "arn:aws:secretsmanager:ap-south-1:263704545632:secret:compliance-ai-service/config-6xLcuJ:LANGSMITH_TRACING::"
+                },
+                {
+                    "name": "LANGSMITH_PROJECT",
+                    "valueFrom": "arn:aws:secretsmanager:ap-south-1:263704545632:secret:compliance-ai-service/config-6xLcuJ:LANGSMITH_PROJECT::"
+                },
+                {
+                    "name": "ENV",
+                    "valueFrom": "arn:aws:secretsmanager:ap-south-1:263704545632:secret:compliance-ai-service/config-6xLcuJ:ENV::"
+                },
+                {
+                    "name": "LOG_LEVEL",
+                    "valueFrom": "arn:aws:secretsmanager:ap-south-1:263704545632:secret:compliance-ai-service/config-6xLcuJ:LOG_LEVEL::"
+                },
+                {
+                    "name": "SALESFORCE_LOGIN_URL",
+                    "valueFrom": "arn:aws:secretsmanager:ap-south-1:263704545632:secret:compliance-ai-service/config-6xLcuJ:SALESFORCE_LOGIN_URL::"
+                },
+                {
+                    "name": "SALESFORCE_USERNAME",
+                    "valueFrom": "arn:aws:secretsmanager:ap-south-1:263704545632:secret:compliance-ai-service/config-6xLcuJ:SALESFORCE_USERNAME::"
+                },
+                {
+                    "name": "SALESFORCE_CLIENT_ID",
+                    "valueFrom": "arn:aws:secretsmanager:ap-south-1:263704545632:secret:compliance-ai-service/config-6xLcuJ:SALESFORCE_CLIENT_ID::"
+                },
+                {
+                    "name": "SALESFORCE_ORG_ID",
+                    "valueFrom": "arn:aws:secretsmanager:ap-south-1:263704545632:secret:compliance-ai-service/config-6xLcuJ:SALESFORCE_ORG_ID::"
+                },
+                {
+                    "name": "SALESFORCE_PRIVATE_KEY",
+                    "valueFrom": "arn:aws:secretsmanager:ap-south-1:263704545632:secret:compliance-ai-service/config-6xLcuJ:SALESFORCE_PRIVATE_KEY::"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/compliance-ai-service",
+                    "awslogs-region": "ap-south-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            },
+            "systemControls": []
         }
-      ],
-      "environment": [
+    ],
+    "family": "compliance-ai-service",
+    "executionRoleArn": "arn:aws:iam::263704545632:role/ecsTaskExecutionRole",
+    "networkMode": "awsvpc",
+    "revision": 1,
+    "volumes": [],
+    "status": "ACTIVE",
+    "requiresAttributes": [
         {
-          "name": "PORT",
-          "value": "8000"
+            "name": "com.amazonaws.ecs.capability.logging-driver.awslogs"
+        },
+        {
+            "name": "ecs.capability.execution-role-awslogs"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.ecr-auth"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
+        },
+        {
+            "name": "ecs.capability.secrets.asm.environment-variables"
+        },
+        {
+            "name": "ecs.capability.execution-role-ecr-pull"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
+        },
+        {
+            "name": "ecs.capability.task-eni"
         }
-      ],
-      "logConfiguration": {
-        "logDriver": "awslogs",
-        "options": {
-          "awslogs-group": "/ecs/compliance-ai-service",
-          "awslogs-region": "ap-south-1",
-          "awslogs-stream-prefix": "ecs"
-        }
-      }
-    }
-  ]
+    ],
+    "placementConstraints": [],
+    "compatibilities": [
+        "EC2",
+        "FARGATE",
+        "MANAGED_INSTANCES"
+    ],
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "1024",
+    "memory": "2048",
+    "registeredAt": "2026-08-17T21:10:03.206000+04:00",
+    "registeredBy": "arn:aws:iam::263704545632:user/compliance-ai-deployer"
 }
